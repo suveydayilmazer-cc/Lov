@@ -25,6 +25,8 @@
             position: relative;
             width: 600px;
             height: 600px; 
+            /* Kalbi genel olarak biraz daha yukarı taşımak için üstten boşluk/transform ayarı */
+            transform: translateY(-30px);
         }
 
         .word {
@@ -33,7 +35,6 @@
             font-weight: 600;
             opacity: 0;
             transform: scale(0.1);
-            /* Geçiş süresini uzatarak daha yumuşak ve yavaş bir belirme efekti sağladık */
             transition: opacity 0.8s ease, transform 0.8s ease;
             text-shadow: 0 0 6px rgba(255, 26, 64, 0.5);
             white-space: nowrap;
@@ -66,8 +67,8 @@
         const container = document.getElementById('heart-container');
         const wordElements = [];
 
-        // 1. Önce kalbin dış çerçevesini oluşturan noktalar
-        const borderPointsCount = 70;
+        // 1. Dış çerçeve noktaları
+        const borderPointsCount = 75;
         const borderPoints = [];
         for (let i = 0; i < borderPointsCount; i++) {
             const t = (i / borderPointsCount) * Math.PI * 2;
@@ -76,12 +77,12 @@
             borderPoints.push({ x, y, type: 'border' });
         }
 
-        // 2. İç kısmı dolduran noktalar
+        // 2. İç dolgu noktaları (Üst üste binmeyi önleyen ve boşlukları kapatan optimize aralık)
         const innerPoints = [];
-        for (let x = -13; x <= 13; x += 1.4) {
-            for (let y = -14; y <= 11; y += 1.4) {
+        for (let x = -13; x <= 13; x += 1.25) {
+            for (let y = -14; y <= 11; y += 1.25) {
                 if (Math.pow(x/3, 2) + Math.pow(y/3, 2) - 1 < 3.2) {
-                    const checkDist = borderPoints.some(p => Math.hypot(p.x - x, p.y - y) < 1.2);
+                    const checkDist = borderPoints.some(p => Math.hypot(p.x - x, p.y - y) < 1.1);
                     if (!checkDist) {
                         innerPoints.push({ x, y, type: 'inner' });
                     }
@@ -89,10 +90,10 @@
             }
         }
 
-        // İç kısımdaki yazıları yukarıdan aşağıya doğru sıralıyoruz
+        // İç kısımdaki yazıları yukarıdan aşağıya doğru sıralama
         innerPoints.sort((a, b) => a.y - b.y);
 
-        // Hepsini birleştiriyoruz: Önce dış çerçeve, sonra yukarıdan aşağıya iç dolgu
+        // Birleştirme: Önce çerçeve, sonra yukarıdan aşağıya iç kısım
         const allPoints = [...borderPoints, ...innerPoints];
 
         const assignedLanguages = [];
@@ -115,14 +116,13 @@
             wordElements.push(span);
         });
 
-        // Animasyon Sıralaması: Yavaşlatıldı
+        // Yavaş ve akıcı animasyon hızı (120ms)
         let currentIndex = 0;
 
         function animateHeart() {
             if (currentIndex < wordElements.length) {
                 wordElements[currentIndex].classList.add('visible');
                 currentIndex++;
-                // Süreyi artırarak kelimelerin gelme hızını oldukça yavaşlattık (120 milisaniye)
                 setTimeout(animateHeart, 120); 
             }
         }
@@ -134,4 +134,3 @@
 
 </body>
 </html>
-
