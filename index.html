@@ -23,8 +23,8 @@
 
         .container {
             position: relative;
-            width: 700px;
-            height: 700px; 
+            width: 600px;
+            height: 600px; 
         }
 
         .word {
@@ -32,11 +32,12 @@
             color: #ff1a40; /* Canlı kırmızı tonu */
             font-weight: 600;
             opacity: 0;
-            transform: scale(0.2);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            text-shadow: 0 0 6px rgba(255, 26, 64, 0.4);
+            transform: scale(0.1);
+            /* Geçiş süresini uzatarak daha yumuşak ve yavaş bir belirme efekti sağladık */
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            text-shadow: 0 0 6px rgba(255, 26, 64, 0.5);
             white-space: nowrap;
-            font-size: 13px; /* Okunabilir, ferah boyut */
+            font-size: 11px; 
         }
 
         .word.visible {
@@ -50,25 +51,23 @@
     <div class="container" id="heart-container"></div>
 
     <script>
-        // Farklı dünya dillerinde "Seni seviyorum" (Toplam 40+ benzersiz dil)
         const languages = [
             "Seni Seviyorum", "I Love You", "Te amo", "Je t'aime", 
             "Ich liebe dich", "Ti amo", "Я тебя люблю", "Te quiero", 
             "Kocham Cię", "Mahal kita", "Minä rakastan sinua", "Jeg elsker dig", 
             "Σ' αγαπώ", "Volim te", "Szeretlek", "Te dua", "Ik hou van jou", "Milujem ťa",
             "Saranghae", "Wo ai ni", "Aishiteru", "Te iubesc", "Obicham te", 
-            "Mahal kita", "Aloha wau ia `oe", "Ngiyakuthanda", "Nakupenda", "Es tevi mīlu", 
-            "Aš tave myliu", "Ma armastan sind", "Eg elski teg", "Se yor hrak", 
+            "Aloha wau ia `oe", "Ngiyakuthanda", "Nakupenda", "Es tevi mīlu", 
+            "Aš tave myliu", "Ma armastan sind", "Eg elski teg", 
             "Ani ohev otakh", "Ana behibak", "Men seni sevaman", "Seni söýýärin", 
-            "Min seni söýerin", "Ez te hezkir dikim", "Bax sodum", "Bi lu love", 
-            "Mən səni sevirəm", "As te a ve", "Kuyux muna"
+            "Ez te hezkir dikim", "Mən səni sevirəm", "çünki sevirem"
         ];
 
         const container = document.getElementById('heart-container');
         const wordElements = [];
 
-        // 1. Çerçeve (Kontur) için noktalar
-        const borderPointsCount = 45;
+        // 1. Önce kalbin dış çerçevesini oluşturan noktalar
+        const borderPointsCount = 70;
         const borderPoints = [];
         for (let i = 0; i < borderPointsCount; i++) {
             const t = (i / borderPointsCount) * Math.PI * 2;
@@ -77,12 +76,12 @@
             borderPoints.push({ x, y, type: 'border' });
         }
 
-        // 2. İç kısım için aralıklı noktalar (Sıkışmayı önlemek için adım aralığı genişletildi)
+        // 2. İç kısmı dolduran noktalar
         const innerPoints = [];
-        for (let x = -12; x <= 12; x += 2.2) {
-            for (let y = -13; y <= 10; y += 2.2) {
+        for (let x = -13; x <= 13; x += 1.4) {
+            for (let y = -14; y <= 11; y += 1.4) {
                 if (Math.pow(x/3, 2) + Math.pow(y/3, 2) - 1 < 3.2) {
-                    const checkDist = borderPoints.some(p => Math.hypot(p.x - x, p.y - y) < 1.8);
+                    const checkDist = borderPoints.some(p => Math.hypot(p.x - x, p.y - y) < 1.2);
                     if (!checkDist) {
                         innerPoints.push({ x, y, type: 'inner' });
                     }
@@ -90,32 +89,24 @@
             }
         }
 
-        // İç kısımdaki noktaları yukarıdan aşağıya (Y eksenine göre) sıralıyoruz
+        // İç kısımdaki yazıları yukarıdan aşağıya doğru sıralıyoruz
         innerPoints.sort((a, b) => a.y - b.y);
 
-        // Hepsini birleştiriyoruz: Önce çevre, sonra yukarıdan aşağıya iç kısım
+        // Hepsini birleştiriyoruz: Önce dış çerçeve, sonra yukarıdan aşağıya iç dolgu
         const allPoints = [...borderPoints, ...innerPoints];
 
-        // Dilleri karıştırıp her birinin maksimum 1-2 kez kullanılmasını sağlıyoruz
-        // Toplam nokta sayısı kadar dili döngüsel olarak harmanlıyoruz
         const assignedLanguages = [];
-        let langIndex = 0;
-        
-        // Dilleri rastgele ama eşit dağıtmak için kopyalayıp karıştırabiliriz
         for (let i = 0; i < allPoints.length; i++) {
-            assignedLanguages.push(languages[langIndex % languages.length]);
-            langIndex++;
+            assignedLanguages.push(languages[i % languages.length]);
         }
 
-        // Noktaları ekrana basma
         allPoints.forEach((p, index) => {
             const span = document.createElement('span');
             span.classList.add('word');
             span.innerText = assignedLanguages[index];
             
-            // Genişletilmiş koordinat sistemi (okunaklı ve ferah görünüm için)
-            const posX = 350 + p.x * 19; 
-            const posY = 350 + p.y * 19;
+            const posX = 300 + p.x * 16; 
+            const posY = 300 + p.y * 16;
             
             span.style.left = posX + 'px';
             span.style.top = posY + 'px';
@@ -124,22 +115,23 @@
             wordElements.push(span);
         });
 
-        // Animasyon Sıralaması: Sırayla ekranda belirme
+        // Animasyon Sıralaması: Yavaşlatıldı
         let currentIndex = 0;
 
         function animateHeart() {
             if (currentIndex < wordElements.length) {
                 wordElements[currentIndex].classList.add('visible');
                 currentIndex++;
-                setTimeout(animateHeart, 45); // Akıcı ve göz yormayan hız
+                // Süreyi artırarak kelimelerin gelme hızını oldukça yavaşlattık (120 milisaniye)
+                setTimeout(animateHeart, 120); 
             }
         }
 
-        // Sayfa açıldıktan kısa süre sonra başlat
         window.onload = () => {
-            setTimeout(animateHeart, 400);
+            setTimeout(animateHeart, 500);
         };
     </script>
 
 </body>
 </html>
+
