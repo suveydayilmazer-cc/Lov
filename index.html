@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalp Animasyonu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            position: relative;
+            width: 700px;
+            height: 700px; 
+        }
+
+        .word {
+            position: absolute;
+            color: #ff1a40; /* Canlı kırmızı tonu */
+            font-weight: 600;
+            opacity: 0;
+            transform: scale(0.2);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            text-shadow: 0 0 6px rgba(255, 26, 64, 0.4);
+            white-space: nowrap;
+            font-size: 13px; /* Okunabilir, ferah boyut */
+        }
+
+        .word.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="heart-container"></div>
+
+    <script>
+        // Farklı dünya dillerinde "Seni seviyorum" (Toplam 40+ benzersiz dil)
+        const languages = [
+            "Seni Seviyorum", "I Love You", "Te amo", "Je t'aime", 
+            "Ich liebe dich", "Ti amo", "Я тебя люблю", "Te quiero", 
+            "Kocham Cię", "Mahal kita", "Minä rakastan sinua", "Jeg elsker dig", 
+            "Σ' αγαπώ", "Volim te", "Szeretlek", "Te dua", "Ik hou van jou", "Milujem ťa",
+            "Saranghae", "Wo ai ni", "Aishiteru", "Te iubesc", "Obicham te", 
+            "Mahal kita", "Aloha wau ia `oe", "Ngiyakuthanda", "Nakupenda", "Es tevi mīlu", 
+            "Aš tave myliu", "Ma armastan sind", "Eg elski teg", "Se yor hrak", 
+            "Ani ohev otakh", "Ana behibak", "Men seni sevaman", "Seni söýýärin", 
+            "Min seni söýerin", "Ez te hezkir dikim", "Bax sodum", "Bi lu love", 
+            "Mən səni sevirəm", "As te a ve", "Kuyux muna"
+        ];
+
+        const container = document.getElementById('heart-container');
+        const wordElements = [];
+
+        // 1. Çerçeve (Kontur) için noktalar
+        const borderPointsCount = 45;
+        const borderPoints = [];
+        for (let i = 0; i < borderPointsCount; i++) {
+            const t = (i / borderPointsCount) * Math.PI * 2;
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            borderPoints.push({ x, y, type: 'border' });
+        }
+
+        // 2. İç kısım için aralıklı noktalar (Sıkışmayı önlemek için adım aralığı genişletildi)
+        const innerPoints = [];
+        for (let x = -12; x <= 12; x += 2.2) {
+            for (let y = -13; y <= 10; y += 2.2) {
+                if (Math.pow(x/3, 2) + Math.pow(y/3, 2) - 1 < 3.2) {
+                    const checkDist = borderPoints.some(p => Math.hypot(p.x - x, p.y - y) < 1.8);
+                    if (!checkDist) {
+                        innerPoints.push({ x, y, type: 'inner' });
+                    }
+                }
+            }
+        }
+
+        // İç kısımdaki noktaları yukarıdan aşağıya (Y eksenine göre) sıralıyoruz
+        innerPoints.sort((a, b) => a.y - b.y);
+
+        // Hepsini birleştiriyoruz: Önce çevre, sonra yukarıdan aşağıya iç kısım
+        const allPoints = [...borderPoints, ...innerPoints];
+
+        // Dilleri karıştırıp her birinin maksimum 1-2 kez kullanılmasını sağlıyoruz
+        // Toplam nokta sayısı kadar dili döngüsel olarak harmanlıyoruz
+        const assignedLanguages = [];
+        let langIndex = 0;
+        
+        // Dilleri rastgele ama eşit dağıtmak için kopyalayıp karıştırabiliriz
+        for (let i = 0; i < allPoints.length; i++) {
+            assignedLanguages.push(languages[langIndex % languages.length]);
+            langIndex++;
+        }
+
+        // Noktaları ekrana basma
+        allPoints.forEach((p, index) => {
+            const span = document.createElement('span');
+            span.classList.add('word');
+            span.innerText = assignedLanguages[index];
+            
+            // Genişletilmiş koordinat sistemi (okunaklı ve ferah görünüm için)
+            const posX = 350 + p.x * 19; 
+            const posY = 350 + p.y * 19;
+            
+            span.style.left = posX + 'px';
+            span.style.top = posY + 'px';
+
+            container.appendChild(span);
+            wordElements.push(span);
+        });
+
+        // Animasyon Sıralaması: Sırayla ekranda belirme
+        let currentIndex = 0;
+
+        function animateHeart() {
+            if (currentIndex < wordElements.length) {
+                wordElements[currentIndex].classList.add('visible');
+                currentIndex++;
+                setTimeout(animateHeart, 45); // Akıcı ve göz yormayan hız
+            }
+        }
+
+        // Sayfa açıldıktan kısa süre sonra başlat
+        window.onload = () => {
+            setTimeout(animateHeart, 400);
+        };
+    </script>
+
+</body>
+</html>
